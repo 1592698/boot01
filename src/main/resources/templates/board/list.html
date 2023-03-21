@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/basic.html}">
+<head>
+    <meta charset="UTF-8">
+    <title>Board List</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="row mt-3">
+        <form action="/board/list" method="get">
+            <div class="col">
+                <input type="hidden" name="size" th:value="${pageRequestDTO.size}">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <select class="form-select" name="type">
+                            <option value="">---</option>
+                            <option value="t" th:selected="${pageRequestDTO.type == 't'}">제목</option>
+                            <option value="c" th:selected="${pageRequestDTO.type == 'c'}">내용</option>
+                            <option value="w" th:selected="${pageRequestDTO.type == 'w'}">작성자</option>
+                            <option value="tc" th:selected="${pageRequestDTO.type == 'tc'}">제목 내용</option>
+                            <option value="tcw" th:selected="${pageRequestDTO.type == 'tcw'}">제목 내용 작성자</option>
+                        </select>
+                    </div>
+                    <input type="text" class="form-control" name="keyword" th:value="${pageRequestDTO.keyword}">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary searchBtn" type="submit">Search</button>
+                        <button class="btn btn-outline-secondary clearBtn" type="submit">Clear</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div> <!-- row end -->
+
+    <div class="modal" tabindex="-1"><!-- 모달 창 코드 -->
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modal title</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Modal body text goes here.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div><!-- 모달창 코드 끝 -->
+
+    <div class="card">
+        <div class="card-header">
+            Board List
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Board List</h5>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">Bno</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Writer</th>
+                    <th scope="col">RegDate</th>
+                </tr>
+                </thead>
+
+                <!-- 실제 내용물의 출력은 <tbody>를 이용하고, Thymeleaf의 반복문을 이용해 처리 -->
+                <tbody>
+                <tr th:each="dto:${responseDTO.boardList}">
+                    <th scope="col">[[${dto.bno}]]</th>
+                    <td>[[${dto.title}]]</td>
+                    <td>[[${dto.writer}]]</td>
+                    <td>[[${#temporals.format(dto.modDate, 'yyyy-MM-dd')}]]</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="float-end">
+                <ul class="pagination flex-wrap">
+                    <li class="page-item" th:if="${responseDTO.prev}">
+                        <a class="page-link" th:data-num="${responseDTO.start - 1}">Previous</a>
+                    </li>
+
+                    <th:block th:each="i: ${#numbers.sequence(responseDTO.start, responseDTO.end)}">
+                        <li th:class="${responseDTO.page == i} ? 'page-item active' : 'page-item'">
+                            <a class="page-link" th:data-num="${i}">[[${i}]]</a>
+                        </li>
+                    </th:block>
+
+                    <li class="page-item" th:if="${responseDTO.next}">
+                        <a class="page-link" th:data-num="${responseDTO.end + 1}">Next</a>
+                    </li>
+                </ul>
+            </div> <!-- float end -->
+
+
+        </div> <!-- end card body -->
+    </div> <!-- end card -->
+</div> <!-- end col -->
+
+</div>
+
+<script layout:fragment="script" th:inline="javascript">
+    console.log('script...');
+
+    // 페이징 클릭 이벤트 추가하기
+    document.querySelector(".pagination").addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const target = e.target;
+
+        if(target.tagName !== 'A') {
+            return;
+        }
+
+        const num = target.getAttribute("data-num");
+        const formObj = document.querySelector("form");
+
+        formObj.innerHTML += `<input type='hidden' name='page' value='${num}'>`;
+        formObj.submit();
+    }, false)
+
+    // 검색 초기화 버튼의 클릭 이벤트 추가하기
+    document.querySelector(".clearBtn").addEventListener("click", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        self.location = '/board/list';
+    }, false)
+
+    // 4. 정상적인 처리와 모달창
+    // 등록 화면에서 필요한 내용들이 추가되면 정상적으로 '/board/list'로 이동 됨
+    // 목록 화면으로 이동했을 떄 BoardController에서 RedirectAttributes의 addFlashAttribute()를 이용해 'result'라는 데이터를 추가적 전달
+    // addFlashAttribute()로 전달된 데이터는 쿼리 스트링을 거치지 X => 브라우저 경로에 보이지 X
+    // list.html에서 전달된 result 변수를 이용해 모달창으로 처리
+
+    // show modal
+    const result = [[${result}]];
+    const modal = new bootstrap.Modal(document.querySelector(".modal"));
+
+
+    if(result) {
+        modal.show();
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h1 th:text="${msg}"></h1>
+
+<!-- <h3 th:each="${sos}">SOS</h3>-->
+<!--/*   <div>-->
+<!--        <h1>AAAA</h1>-->
+<!--    </div> */-->
+
+<!--/* Thymelaf의 주석 처리문 : 에러가 난 부분을 찾기 위해 주석 처리를 해야할 때 이용
+           주석은 Thymeleaf가 파싱 처리할 때 삭제되어 처리 => 잘못된 문법에 대한 체크도 건너 뛸 수 있고,
+           삭제된 상태에서 처리되므로 브라우저에서는 아예 해당 부분은 결과 자체가 X
+   */-->
+
+    <div th:with="num1 = ${10}, num2 = ${20}">
+        <h4 th:text="${num1 + num2}"></h4>
+    </div>
+</body>
+</html>
